@@ -20,11 +20,11 @@ MongoClient.connect('mongodb://127.0.0.1:27017/messageDB', function(err,
 		throw err;
 	} else {
 		db = database;
-		console.log("Connected to db!");
+		console.log("Connected to MongoDB!");
 	}
 });
 
-// make our db accessible to our router
+// make db accessible from router
 app.use(function(req, res, next) {
 	req.db = db;
 	next();
@@ -53,10 +53,11 @@ io.on('connection', function(socket) {
 	});
 });
 
+// routes
 app.get('/', routes.getMessages);
 app.post('/chat', routes.createMessage);
 app.post('/clear', routes.deleteMessages);
 
 http.listen(3000, function() {
-	console.log('listening on *:3000');
+	console.log('Express server listening on port 3000');
 });
