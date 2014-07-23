@@ -1,0 +1,65 @@
+extends layout
+
+block content
+  
+  // Jade
+  div(class="container")
+  
+    h1= title
+  
+    div(class="col-md-4")
+  
+      form(id="send" action="")
+        input(id="name", autocomplete="off" placeholder="Name" required="true" class="form-control")
+        textarea(id="message", autocomplete="off" placeholder="Message" required="true" class="form-control")
+        input(id="chat" type="submit" value="Send" class="form-control btn btn-success")    
+      
+      form(action="/clear" method="post")
+        input(id="clear" type="submit" value="Clear" class="form-control btn btn-warning")        
+
+    table(id="messages" class="table table-striped") 
+      thead 
+        tr(class="row")
+          th Name
+          th Message
+      tbody 
+        each message in messages  
+          tr(class="row")
+            td(class="col-md-4") #{message.name}
+            td(class="col-md-8") #{message.message}  
+        
+    // JavaScript
+    script.
+      var socket = io();
+      // when send form button is clicked
+      $('#send').submit(function(){
+      
+        var messageObj = {
+          'name' : $('#name').val(),
+          'message' : $('#message').val()
+        };
+        
+        // send message to server
+        socket.emit('message', messageObj);
+        
+        // send ajax post to save message to db
+        $.ajax({
+          type : 'POST',
+          url : window.location + 'chat',
+          data : JSON.stringify(messageObj),
+            complete : function(data) {
+            },
+            contentType : "application/json",
+            dataType : 'json'
+        });
+
+        return false;
+      });
+      
+      // listen to server for messages
+      socket.on('message', function(msg){
+        // append message from server to the messasge table
+        $('#messages tr:last').after("<tr class='row'><td class='col-md-4'>" + msg['name'] + 
+          "</td><td class='col-md-8'>" + msg['message'] + "</td></tr");
+      });
+      
